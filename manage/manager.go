@@ -23,21 +23,21 @@ func NewDefaultManager() *Manager {
 // NewManager create to authorization management instance
 func NewManager() *Manager {
 	return &Manager{
-		gtcfg:       make(map[oauth2.GrantType]*Config),
-		validateURI: DefaultValidateURI,
+		gtcfg:              make(map[oauth2.GrantType]*Config),
+		ValidateURIHandler: DefaultValidateURI,
 	}
 }
 
 // Manager provide authorization management
 type Manager struct {
-	codeExp           time.Duration
-	gtcfg             map[oauth2.GrantType]*Config
-	rcfg              *RefreshingConfig
-	validateURI       ValidateURIHandler
-	authorizeGenerate oauth2.AuthorizeGenerate
-	accessGenerate    oauth2.AccessGenerate
-	tokenStore        oauth2.TokenStore
-	clientStore       oauth2.ClientStore
+	codeExp            time.Duration
+	gtcfg              map[oauth2.GrantType]*Config
+	rcfg               *RefreshingConfig
+	ValidateURIHandler ValidateURIHandler
+	authorizeGenerate  oauth2.AuthorizeGenerate
+	accessGenerate     oauth2.AccessGenerate
+	tokenStore         oauth2.TokenStore
+	clientStore        oauth2.ClientStore
 }
 
 // get grant type config
@@ -90,7 +90,7 @@ func (m *Manager) SetRefreshTokenCfg(cfg *RefreshingConfig) {
 
 // SetValidateURIHandler set the validates that RedirectURI is contained in baseURI
 func (m *Manager) SetValidateURIHandler(handler ValidateURIHandler) {
-	m.validateURI = handler
+	m.ValidateURIHandler = handler
 }
 
 // MapAuthorizeGenerate mapping the authorize code generate interface
@@ -146,7 +146,7 @@ func (m *Manager) GenerateAuthToken(ctx context.Context, rt oauth2.ResponseType,
 	if err != nil {
 		return nil, err
 	} else if tgr.RedirectURI != "" {
-		if err := m.validateURI(cli.GetDomain(), tgr.RedirectURI); err != nil {
+		if err := m.ValidateURIHandler(cli.GetDomain(), tgr.RedirectURI); err != nil {
 			return nil, err
 		}
 	}
@@ -290,7 +290,7 @@ func (m *Manager) GenerateAccessToken(ctx context.Context, gt oauth2.GrantType, 
 		return nil, errors.ErrInvalidClient
 	}
 	if tgr.RedirectURI != "" {
-		if err := m.validateURI(cli.GetDomain(), tgr.RedirectURI); err != nil {
+		if err := m.ValidateURIHandler(cli.GetDomain(), tgr.RedirectURI); err != nil {
 			return nil, err
 		}
 	}
