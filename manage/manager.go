@@ -218,14 +218,13 @@ func (m *Manager) GenerateAuthToken(ctx context.Context, rt oauth2.ResponseType,
 	}
 	return ti, nil
 }
- 
+
 // get authorization code data
 func (m *Manager) getAuthorizationCode(ctx context.Context, code string) (oauth2.TokenInfo, error) {
 	ti, err := m.tokenStore.GetByCode(ctx, code)
 	if err != nil {
 		return nil, err
 	} else if ti == nil || ti.GetCode() != code || ti.GetCodeCreateAt().Add(ti.GetCodeExpiresIn()).Before(time.Now()) {
-		err = errors.ErrInvalidAuthorizeCode
 		return nil, errors.ErrInvalidAuthorizeCode
 	}
 	return ti, nil
